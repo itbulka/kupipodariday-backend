@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
-import { IsNumber } from 'class-validator';
+import { IsBoolean } from 'class-validator';
 
 @Entity()
 export class Offer {
@@ -27,13 +27,10 @@ export class Offer {
   @ManyToOne(() => Wish, (wish) => wish.offers)
   item: Wish;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  @IsNumber()
+  @Column('decimal')
   amount: number;
 
-  @Column({
-    type: 'boolean',
-    default: false,
-  })
+  @Column({ default: false })
+  @IsBoolean()
   hidden: boolean;
 }

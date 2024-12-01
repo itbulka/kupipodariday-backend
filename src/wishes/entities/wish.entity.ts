@@ -6,10 +6,12 @@ import {
   UpdateDateColumn,
   OneToMany,
   ManyToMany,
+  ManyToOne,
 } from 'typeorm';
-import { IsUrl, Max, Min, IsNumber } from 'class-validator';
+import { IsUrl, Max, Min, IsNumber, Length } from "class-validator";
 import { Offer } from '../../offers/entities/offer.entity';
 import { User } from '../../users/entities/user.entity';
+import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
@@ -23,8 +25,7 @@ export class Wish {
   updatedAt: Date;
 
   @Column()
-  @Min(2)
-  @Max(250)
+  @Length(1, 250)
   name: string;
 
   @Column()
@@ -35,26 +36,27 @@ export class Wish {
   @IsUrl()
   image: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  @IsNumber()
+  @Column('decimal')
+  @IsNumber({ maxDecimalPlaces: 2 })
   price: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  @IsNumber()
+  @Column('decimal', { default: 0 })
+  @IsNumber({ maxDecimalPlaces: 2 })
   raised: number;
 
-  @ManyToMany(() => User, (user) => user.wishes)
-  owner: User[];
+  @ManyToOne(() => User, (user) => user.wishes)
+  owner: User;
 
   @Column()
-  @Min(1)
-  @Max(1024)
+  @Length(1, 1024)
   description: string;
 
   @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
 
-  @Column()
-  @IsNumber()
+  @Column({ default: 0 })
   copied: number;
+
+  @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
+  wishlist: Wishlist[];
 }

@@ -4,12 +4,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany, ManyToMany
-} from "typeorm";
-import { Min, Max, IsNotEmpty, IsUrl, IsEmail } from 'class-validator';
+  OneToMany,
+} from 'typeorm';
+import { IsUrl, IsEmail, Length, IsOptional } from 'class-validator';
 import { Offer } from '../../offers/entities/offer.entity';
-import { Wish } from "../../wishes/entities/wish.entity";
-import { Wishlist } from "../../wishlists/entities/wishlist.entity";
+import { Wish } from '../../wishes/entities/wish.entity';
+import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class User {
@@ -22,44 +22,33 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({
-    unique: true,
-  })
-  @Min(2)
-  @Max(30)
-  @IsNotEmpty()
+  @Column({ unique: true })
+  @Length(2, 30)
   username: string;
 
-  @Column({
-    default: 'Пока ничего не рассказал о себе',
-  })
-  @Min(2)
-  @Max(200)
+  @Column({ default: 'Пока ничего не рассказал о себе' })
+  @Length(2, 200)
+  @IsOptional()
   about: string;
 
-  @Column({
-    default: 'https://i.pravatar.cc/300',
-  })
+  @Column({ default: 'https://i.pravatar.cc/300' })
   @IsUrl()
+  @IsOptional()
   avatar: string;
 
-  @Column({
-    unique: true,
-  })
+  @Column({ unique: true })
   @IsEmail()
-  @IsNotEmpty()
   email: string;
 
-  @Column()
-  @IsNotEmpty()
+  @Column({ select: false })
   password: string;
 
-  @ManyToMany(() => Wish, (wish) => wish.owner)
+  @OneToMany(() => Wish, (wish) => wish.owner)
   wishes: Wish[];
 
   @OneToMany(() => Offer, (offer) => offer.user)
   offers: Offer[];
 
-  @OneToMany(() => Wishlist, (wishlist) => wishlist.id)
-  wishlists: Wishlist[];
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
+  wishlist: Wishlist[];
 }
