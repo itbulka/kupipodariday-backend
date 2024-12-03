@@ -7,18 +7,22 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { WishlistsService } from './wishlists.service';
+import { JwtGuard } from '../guards/jwt.guard';
 
-@Controller('wishlists')
+@Controller('wishlistlists')
+@UseGuards(JwtGuard)
 export class WishlistsController {
   constructor(private readonly wishlistService: WishlistsService) {}
 
   @Post()
-  create(@Body() createWishlistDto: CreateWishlistDto) {
-    return this.wishlistService.create(createWishlistDto);
+  create(@Body() createWishlistDto: CreateWishlistDto, @Req() req) {
+    return this.wishlistService.create(createWishlistDto, req.user.id);
   }
 
   @Get()
@@ -28,19 +32,20 @@ export class WishlistsController {
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.wishlistService.findOne(id);
+    return this.wishlistService.findOneWishlist(id);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
+    @Req() req,
   ) {
-    return this.wishlistService.update(id, updateWishlistDto);
+    return this.wishlistService.update(id, updateWishlistDto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.wishlistService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.wishlistService.remove(id, req.user.id);
   }
 }

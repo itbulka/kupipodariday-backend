@@ -1,34 +1,38 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersService } from './users/users.service';
-import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
-import { WishesService } from './wishes/wishes.service';
-import { WishesController } from './wishes/wishes.controller';
 import { WishesModule } from './wishes/wishes.module';
-import { WishlistsService } from './wishlists/wishlists.service';
-import { WishlistsController } from './wishlists/wishlists.controller';
 import { WishlistsModule } from './wishlists/wishlists.module';
-import { OffersService } from './offers/offers.service';
-import { OffersController } from './offers/offers.controller';
 import { OffersModule } from './offers/offers.module';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { User } from './users/entities/user.entity';
+import { Wish } from './wishes/entities/wish.entity';
+import { Wishlist } from './wishlists/entities/wishlist.entity';
+import { Offer } from './offers/entities/offer.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'student',
+      password: 'student',
+      database: 'nest_project',
+      schema: 'kupipodariday',
+      entities: [User, Wish, Wishlist, Offer],
+      synchronize: true,
+    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     WishesModule,
     WishlistsModule,
     OffersModule,
+    AuthModule,
   ],
-  controllers: [
-    AppController,
-    UsersController,
-    WishesController,
-    WishlistsController,
-    OffersController,
-  ],
-  providers: [UsersService, WishesService, WishlistsService, OffersService],
+  controllers: [AppController],
+  providers: [],
 })
 export class AppModule {}

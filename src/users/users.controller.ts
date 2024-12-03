@@ -1,18 +1,20 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtGuard } from '../guards/jwt.guard';
 
 @Controller('users')
+@UseGuards(JwtGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -21,31 +23,33 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Get('me')
+  getCurrentUser(@Req() req) {
+    return this.usersService.findOne(req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne(id);
+  @Get('me/wishes')
+  getCurrentUserWishes(@Req() req) {
+    return this.usersService.getUserWishes(req.user.username);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.updateOne(id, updateUserDto);
+  @Patch('me')
+  updateUser(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateOne(req.user.id, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.removeOne(id);
+  @Get(':username')
+  findOne(@Param('username') username: string) {
+    return this.usersService.findByUsername(username);
   }
 
-  @Post('signup')
-  signup(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get(':username/wishes')
+  getUserWishes(@Param('username') username: string) {
+    return this.usersService.getUserWishes(username);
+  }
+
+  @Post('find')
+  findUser(@Body('query') query: string) {
+    return this.usersService.findUser({ where: { username: query } });
   }
 }
